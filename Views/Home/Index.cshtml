@@ -32,7 +32,7 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-4">
+                        <div class="col-6">
                             <div class="input-group mb-3">
                                 <span class="input-group-text">需完成數量</span>
                                 <input type="text" class="form-control" id="needNumber" aria-describedby="basic-addon3">
@@ -45,7 +45,7 @@
                         </div>
                     </div>
 
-                    <button type="button" class="btn btn-success" id="sendDataBTN">送出</button>
+                    <button type="button" class="btn btn-success" id="sendDataBTN" style="background-color: #F75000; border-color: #F75000 ">送出</button>
 
                 </div>
             </div>
@@ -73,32 +73,77 @@
 
 <!--甘特圖任務-->
 <script>
-    var tasks = [
-        {
-            id: 'Task 1',
-            name: 'Redesign website',
-            start: '2016-12-28',
-            end: '2016-12-31',
-            progress: 20,
-        },
-        {
-            id: 'Task 2',
-            name: 'Redesign',
-            start: '2016-12-31',
-            end: '2017-01-01',
-            progress: 60,
-        },
-    ]
+    var gantt;
+    var tasks = []
+</script>
+
+<!--取得目前工作列表-->
+<script>
+    function getTasksData() {
+        $.ajax({
+            method: "GET",
+            url: "/API/getTaskInfo",
+            data: {},
+            statusCode: {
+                404: function (err) {
+                    console.error(err)
+                },
+                500: function (err) {
+                    console.error(err)
+                },
+            }
+        })
+            .done(function (msg) {
+                let tasksTemp = JSON.parse(msg.data)
+
+                for (i = 0; i < tasksTemp.length; i++) {
+                    let elementTask = {
+                        id: "task" + i,
+                        name: tasksTemp[i].taskName,
+                        start: tasksTemp[i].startTime,
+                        end: tasksTemp[i].endTime,
+                        progress: (tasksTemp[i].needNumber / tasksTemp[i].finishedNumber),
+                        custom_class: 'class'+i
+                    }
+                    tasks.push(elementTask);
+                }
+
+                console.log(tasks)
+
+                gantt = new Gantt("#gantt", tasks);
+            });
+    }
 </script>
 
 <!--新增工作進度-->
 <script>
     function clickEvent() {
+        //取得每個欄位內的數值
         let taskName = document.getElementById("taskName").value;
         let startTime = document.getElementById("startTime").value;
         let endTime = document.getElementById("endTime").value;
         let needNumber = document.getElementById("needNumber").value;
         let finishedNumber = document.getElementById("finishedNumber").value;
+
+        //檢查每個欄位都有輸入
+        if (taskName == "" || startTime == "" || endTime == "" || needNumber == "" || finishedNumber == "") {
+            Swal.fire({
+                title: '請確保每個欄位都有輸入!',
+                text: '請檢查是否所有的數值都有輸入',
+                icon: 'error',
+                confirmButtonText: '了解'
+            })
+            return;
+        } else if (parseInt(needNumber) < parseInt(finishedNumber)) {
+            Swal.fire({
+                title: '已經完成數量，應該小於須完成數量!',
+                text: '已經完成數量，應該小於須完成數量',
+                icon: 'error',
+                confirmButtonText: '了解'
+            })
+            return;
+        }
+
         //AJAX
         $.ajax({
             method: "POST",
@@ -137,12 +182,15 @@
     }
 </script>
 
-<!--引入輸入日歷框-->
+<!--JS主函數-->
 <script>
     $(function () {
+        //建立滑鼠點擊事件
         $("#sendDataBTN").click(clickEvent);
-        var gantt = new Gantt("#gantt", tasks);
+        //設置輸入框的日期
         $("#startTime").datepicker({ dateFormat: "yy-mm-dd" });
         $("#endTime").datepicker({ dateFormat: "yy-mm-dd" });
+        //取得資料
+        getTasksData()
     });
 </script>

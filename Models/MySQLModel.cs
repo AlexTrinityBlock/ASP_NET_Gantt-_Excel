@@ -70,7 +70,7 @@ namespace ASP_NET_Gantt__Excel.Models
         }
 
         //取得工作任務資料
-        public void getTaskData()
+        public string getTaskData()
         {
             string sql = @"SELECT * FROM `tasklist` ";
 
@@ -78,17 +78,41 @@ namespace ASP_NET_Gantt__Excel.Models
             DataTable dataTable = new DataTable();
             MySqlDataReader sdr = cmd.ExecuteReader();
 
+            List<TaskData> taskDataList = new List<TaskData>();
+
             if (sdr.HasRows)
             {
                 while (sdr.Read())
                 {
-
+                    TaskData taskData = new TaskData();
+                    taskData.taskName = sdr["taskName"].ToString();
+                    taskData.startTime = sdr["startTime"].ToString();
+                    taskData.endTime = sdr["endTime"].ToString();
+                    taskData.needNumber = sdr["needNumber"].ToString();
+                    taskData.finishedNumber = sdr["finishedNumber"].ToString();
+                    taskDataList.Add(taskData);
                 }
             }
 
             conn.Close();
 
-            //return null;
+            string result = "";
+            result += "[";
+            foreach (TaskData taskData in taskDataList) {
+                result += "{";
+                result += "\"taskName\":\"" + taskData.taskName+"\",";
+                result += "\"startTime\":\"" + taskData.startTime + "\",";
+                result += "\"endTime\":\"" + taskData.endTime + "\",";
+                result += "\"needNumber\":\"" + taskData.needNumber + "\",";
+                result += "\"finishedNumber\":\"" + taskData.finishedNumber + "\"";
+                result += "},";
+            }
+
+            result=result.Remove(result.Length - 1);
+
+            result += "]";
+
+            return result;
         }
 
         //設置工作任務資料

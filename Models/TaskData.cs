@@ -7,6 +7,7 @@ namespace ASP_NET_Gantt__Excel.Models
 {
     public class TaskData
     {
+        public string id;
         public string taskName;
         public string startTime;
         public string endTime;

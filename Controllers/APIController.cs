@@ -15,7 +15,7 @@ namespace ASP_NET_Gantt__Excel.Controllers
         public ActionResult getTaskInfo(string data)
         {
             MySQLModel mySQLModel = new MySQLModel();
-            var jsonData = new { Status = "Success" };
+            var jsonData = new { data= mySQLModel.getTaskData()};
             return Json(jsonData, JsonRequestBehavior.AllowGet);
         }
 

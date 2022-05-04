@@ -32,14 +32,14 @@
   stroke-width: 1.4;
 }
 .gantt .bar {
-  fill: #b8c2cc;
+  fill: #272727;
   stroke: #8D99A6;
   stroke-width: 0;
   transition: stroke-width 0.3s ease;
   user-select: none;
 }
 .gantt .bar-progress {
-  fill: #a3a3ff;
+  fill: #F75000;
 }
 .gantt .bar-invalid {
   fill: transparent;
@@ -117,7 +117,7 @@
   border-radius: 3px;
 }
 .gantt-container .popup-wrapper .title {
-  border-bottom: 3px solid #a3a3ff;
+  border-bottom: 3px solid #F75000;
   padding: 10px;
 }
 .gantt-container .popup-wrapper .subtitle {
