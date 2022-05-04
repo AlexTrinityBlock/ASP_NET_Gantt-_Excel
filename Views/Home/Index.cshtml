@@ -94,6 +94,7 @@
             }
         })
             .done(function (msg) {
+                tasks=[]
                 let tasksTemp = JSON.parse(msg.data)
 
                 for (i = 0; i < tasksTemp.length; i++) {
@@ -102,13 +103,11 @@
                         name: tasksTemp[i].taskName,
                         start: tasksTemp[i].startTime,
                         end: tasksTemp[i].endTime,
-                        progress: (tasksTemp[i].needNumber / tasksTemp[i].finishedNumber),
+                        progress: (tasksTemp[i].finishedNumber / tasksTemp[i].needNumber)*100,
                         custom_class: 'class'+i
                     }
                     tasks.push(elementTask);
                 }
-
-                console.log(tasks)
 
                 gantt = new Gantt("#gantt", tasks);
             });
@@ -118,6 +117,7 @@
 <!--新增工作進度-->
 <script>
     function clickEvent() {
+
         //取得每個欄位內的數值
         let taskName = document.getElementById("taskName").value;
         let startTime = document.getElementById("startTime").value;
@@ -141,6 +141,7 @@
                 icon: 'error',
                 confirmButtonText: '了解'
             })
+
             return;
         }
 
@@ -178,6 +179,7 @@
                     showCancelButton: false,
                     showConfirmButton: false
                 })
+                getTasksData()
             });
     }
 </script>
