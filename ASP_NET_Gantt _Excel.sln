@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASP_NET_Gantt _Excel", "ASP_NET_Gantt _Excel.csproj", "{CAFDABC0-CB6A-4D35-B104-5F1813F9CF68}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CAFDABC0-CB6A-4D35-B104-5F1813F9CF68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAFDABC0-CB6A-4D35-B104-5F1813F9CF68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAFDABC0-CB6A-4D35-B104-5F1813F9CF68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAFDABC0-CB6A-4D35-B104-5F1813F9CF68}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {28F648AE-63FC-44F1-8C82-A32C2D6363B1}
+	EndGlobalSection
+EndGlobal

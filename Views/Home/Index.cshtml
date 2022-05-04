@@ -1,0 +1,148 @@
+﻿@Styles.Render("~/Content/frappe-gantt.css")
+
+@* 上排導覽列 *@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">製作甘特圖作業&nbsp;姓名:蕭維均 &nbsp;學號:1100336</a>
+    </div>
+</nav>
+
+@* 容器 *@
+<div class="container">
+
+    <!--輸入框內容-->
+    <div class="card" style="margin:10px">
+        <div class="card-body">
+            <div class="text-center"><h3>工作進度輸入</h3></div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">任務名稱</span>
+                        <input type="text" class="form-control" id="taskName" aria-describedby="basic-addon3">
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">開始時間</span>
+                        <input type="text" class="form-control datepicker" id="startTime" aria-describedby="basic-addon3">
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">結束時間</span>
+                        <input type="text" class="form-control datepicker" id="endTime" aria-describedby="basic-addon3">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">需完成數量</span>
+                                <input type="text" class="form-control" id="needNumber" aria-describedby="basic-addon3">
+                            </div>
+
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">已完成數量</span>
+                                <input type="text" class="form-control" id="finishedNumber" aria-describedby="basic-addon3">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-success" id="sendDataBTN">送出</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--甘特圖內容-->
+    <div class="row justify-content-md-center">
+        <div class="col-12">
+            <div class="card" style="margin:10px">
+                <div class="card-body">
+                    <h2 class="card-title">工作進度</h2>
+                    <div>
+                        <!--內容-->
+                        <div id="gantt"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--引入甘特圖-->
+@Scripts.Render("~/Scripts/frappe-gantt.js")
+
+<!--甘特圖任務-->
+<script>
+    var tasks = [
+        {
+            id: 'Task 1',
+            name: 'Redesign website',
+            start: '2016-12-28',
+            end: '2016-12-31',
+            progress: 20,
+        },
+        {
+            id: 'Task 2',
+            name: 'Redesign',
+            start: '2016-12-31',
+            end: '2017-01-01',
+            progress: 60,
+        },
+    ]
+</script>
+
+<!--新增工作進度-->
+<script>
+    function clickEvent() {
+        let taskName = document.getElementById("taskName").value;
+        let startTime = document.getElementById("startTime").value;
+        let endTime = document.getElementById("endTime").value;
+        let needNumber = document.getElementById("needNumber").value;
+        let finishedNumber = document.getElementById("finishedNumber").value;
+        //AJAX
+        $.ajax({
+            method: "POST",
+            url: "/API/postTaskInfo",
+            data: {
+                data: JSON.stringify({
+                    "taskName": taskName,
+                    "startTime": startTime,
+                    "endTime": endTime,
+                    "needNumber": needNumber,
+                    "finishedNumber": finishedNumber
+                })
+
+            },
+            statusCode: {
+                500: function () {
+                    Swal.fire({
+                        title: '伺服器端錯誤!',
+                        text: '請檢察是否所有的數值都有輸入',
+                        icon: 'error',
+                        confirmButtonText: '了解'
+                    })
+                },
+            }
+        })
+            .done(function (msg) {
+                Swal.fire({
+                    title: '傳送成功!',
+                    text: '新增材料成功，伺服器進行響應' + msg,
+                    icon: 'success',
+                    timer: 1000,
+                    showCancelButton: false,
+                    showConfirmButton: false
+                })
+            });
+    }
+</script>
+
+<!--引入輸入日歷框-->
+<script>
+    $(function () {
+        $("#sendDataBTN").click(clickEvent);
+        var gantt = new Gantt("#gantt", tasks);
+        $("#startTime").datepicker({ dateFormat: "yy-mm-dd" });
+        $("#endTime").datepicker({ dateFormat: "yy-mm-dd" });
+    });
+</script>
