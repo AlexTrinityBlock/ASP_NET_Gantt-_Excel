@@ -20,37 +20,51 @@
                         <span class="input-group-text">任務名稱</span>
                         <input type="text" class="form-control" id="taskName" aria-describedby="basic-addon3">
                     </div>
-
                     <div class="input-group mb-3">
                         <span class="input-group-text">開始時間</span>
                         <input type="text" class="form-control datepicker" id="startTime" aria-describedby="basic-addon3">
                     </div>
-
                     <div class="input-group mb-3">
                         <span class="input-group-text">結束時間</span>
                         <input type="text" class="form-control datepicker" id="endTime" aria-describedby="basic-addon3">
                     </div>
-
                     <div class="row">
                         <div class="col-6">
                             <div class="input-group mb-3">
                                 <span class="input-group-text">需完成數量</span>
                                 <input type="text" class="form-control" id="needNumber" aria-describedby="basic-addon3">
                             </div>
-
                             <div class="input-group mb-3">
                                 <span class="input-group-text">已完成數量</span>
                                 <input type="text" class="form-control" id="finishedNumber" aria-describedby="basic-addon3">
                             </div>
                         </div>
                     </div>
-
                     <button type="button" class="btn btn-success" id="sendDataBTN" style="background-color: #F75000; border-color: #F75000 ">送出</button>
-
                 </div>
             </div>
         </div>
     </div>
+
+    <!--檔案上傳區塊-->
+    <div class="row justify-content-md-center">
+        <div class="col-12">
+            <div class="card" style="margin:10px">
+                <div class="card-body">
+                    <h2 class="card-title">檔案上傳區塊</h2>
+                    <div>
+                        <!--內容-->
+                        <!--檔案上傳按鈕-->
+                        <form enctype="multipart/form-data">
+                            <label class="form-label">可上傳正確格式的Excel檔案</label>
+                            <input id="upload" class="form-control" type=file name="files[]">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!--甘特圖內容-->
     <div class="row justify-content-md-center">
@@ -94,7 +108,8 @@
             }
         })
             .done(function (msg) {
-                tasks=[]
+                tasks = []
+
                 let tasksTemp = JSON.parse(msg.data)
 
                 for (i = 0; i < tasksTemp.length; i++) {
@@ -103,8 +118,8 @@
                         name: tasksTemp[i].taskName,
                         start: tasksTemp[i].startTime,
                         end: tasksTemp[i].endTime,
-                        progress: (tasksTemp[i].finishedNumber / tasksTemp[i].needNumber)*100,
-                        custom_class: 'class'+i
+                        progress: (tasksTemp[i].finishedNumber / tasksTemp[i].needNumber) * 100,
+                        custom_class: 'class' + i
                     }
                     tasks.push(elementTask);
                 }
@@ -184,9 +199,111 @@
     }
 </script>
 
+<!--批次傳輸Excel內容-->
+<script>
+    function uploadXSLXDataAJAX(proCode, startDate, endTime, realToProducted, planToProducted) {
+        //AJAX
+        $.ajax({
+            method: "POST",
+            url: "/API/postTaskInfo",
+            data: {
+                data: JSON.stringify({
+                    "taskName": proCode,
+                    "startTime": startDate,
+                    "endTime": endTime,
+                    "needNumber": realToProducted, 
+                    "finishedNumber": planToProducted
+                })
+            },
+            statusCode: {
+                500: function () {
+                    Swal.fire({
+                        title: '伺服器端錯誤!',
+                        text: '請檢察是否所有的數值都有輸入',
+                        icon: 'error',
+                        confirmButtonText: '了解'
+                    })
+                },
+            }
+        })
+            .done(function (msg) {
+                getTasksData()
+            });
+    }
+</script>
+
+<!--取得Excel的內容-->
+<script>
+    /**
+     * 轉換Excel日期
+     * xslxData
+     */
+    function xslxDataConvert(xslxData) {
+        xslxData = xslxData.split('/').reverse()
+        xslxData[0] = '20' + xslxData[0]
+        xslxData[1] = xslxData[1].padStart(2, '0')
+        xslxData[2] = xslxData[2].padStart(2, '0')
+        return xslxData.join('-')
+    }
+
+    /**
+     * 當檔案上傳時觸發的函數
+     * evt
+     */
+    function handleFileSelect(evt) {
+        var files = evt.target.files;
+        let file = files[0]
+
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            var data = e.target.result;
+            var workbook = XLSX.read(data, {
+                type: 'binary'
+            });
+            workbook.SheetNames.forEach(function (sheetName) {
+                // Here is your object
+                var XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+                var jsonObjectString = JSON.stringify(XL_row_object);
+                var jsonObject = JSON.parse(jsonObjectString);
+
+                let dataNeedToUploadArray=[]
+
+                for (i = 1; i < jsonObject.length; i++) {
+                    let proCode = jsonObject[i]['pro_code']
+                    let statDate = jsonObject[i]['sch_date_s']
+                    let endTime = jsonObject[i]['sch_date_e']
+                    let realToProducted = jsonObject[i]['pro_qty']
+                    let planToProducted = jsonObject[i]['fin_qty']
+                    statDate = xslxDataConvert(statDate)
+                    endTime = xslxDataConvert(endTime)
+                    uploadXSLXDataAJAX(proCode, statDate, endTime, realToProducted, planToProducted )
+                }
+            })
+        };
+
+        reader.onerror = function (ex) {
+            console.log(ex);
+        };
+
+        reader.readAsBinaryString(file);
+
+        Swal.fire({
+            title: '傳送成功!',
+            text: '新增材料成功，伺服器進行響應',
+            icon: 'success',
+            timer: 1000,
+            showCancelButton: false,
+            showConfirmButton: false
+        })
+    }
+</script>
+
 <!--JS主函數-->
 <script>
     $(function () {
+        //檔案上傳事件
+        $("#upload").change(handleFileSelect);
         //建立滑鼠點擊事件
         $("#sendDataBTN").click(clickEvent);
         //設置輸入框的日期
